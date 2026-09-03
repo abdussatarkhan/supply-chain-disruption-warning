@@ -1,0 +1,162 @@
+# Supply Chain Disruption Early Warning System Configuration
+# Global parameters, API endpoints, model hyperparameters, and alerting thresholds
+
+project:
+  name: "Supply Chain Disruption Early Warning System"
+  version: "1.0.0"
+  description: "Multi-modal predictive warning system combining trade anomaly detection, NLP signals, and logistics vulnerability"
+  author: "Senior Data Analytics & Quantitative Research Team"
+  random_seed: 42
+
+paths:
+  data_raw: "data/raw"
+  data_processed: "data/processed"
+  data_external: "data/external"
+  models: "models"
+  reports: "reports"
+  dashboards: "dashboards"
+
+data_sources:
+  comtrade:
+    base_url: "https://comtradeapi.un.org/public/v1/preview/C/A/HS"
+    subscription_key_env: "COMTRADE_SUBSCRIPTION_KEY"
+    start_year: 2018
+    end_year: 2023
+    hs_chapters:
+      - "84" # Nuclear reactors, boilers, machinery and mechanical appliances
+      - "85" # Electrical machinery and equipment, sound recorders, television
+    priority_subheadings:
+      - "8471" # Automatic data processing machines and units (Computers/Servers)
+      - "8473" # Parts and accessories for typewriters and calculating machines
+      - "8541" # Diodes, transistors, semiconductor devices, photosensitive
+      - "8542" # Electronic integrated circuits and microassemblies (Chips)
+    trade_flows:
+      - 1 # Imports
+      - 2 # Exports
+    target_corridors:
+      - { reporter: "USA", partner: "CHN", name: "US-China Electronics" }
+      - { reporter: "DEU", partner: "CHN", name: "Germany-China Machinery" }
+      - { reporter: "JPN", partner: "USA", name: "Japan-US High-Tech" }
+      - { reporter: "KOR", partner: "USA", name: "Korea-US Semiconductors" }
+      - { reporter: "TWN", partner: "USA", name: "Taiwan-US Integrated Circuits" }
+      - { reporter: "NLD", partner: "TWN", name: "Netherlands-Taiwan Lithography" }
+
+  gdelt:
+    gkg_base_url: "http://data.gdeltproject.org/gdeltv2"
+    doc_api_url: "https://api.gdeltproject.org/api/v2/doc/doc"
+    max_records: 500000
+    languages:
+      - "en"
+    cameo_event_codes:
+      - "0211" # Appeal for economic cooperation
+      - "103"  # Demand economic aid/concessions
+      - "141"  # Demonstrate or conduct strike for economic reasons
+      - "1411" # Labor strike / work stoppage
+      - "173"  # Impose economic blockade/embargo
+      - "174"  # Impose embargo on military/industrial goods
+      - "181"  # Physical assault on transport infrastructure
+      - "193"  # Fight with artillery / maritime blockades
+    logistics_keywords:
+      - "port congestion"
+      - "container shortage"
+      - "freight rate"
+      - "supply chain disruption"
+      - "dockworker strike"
+      - "canal blockage"
+      - "chip shortage"
+      - "semiconductor supply"
+      - "export ban"
+      - "customs bottleneck"
+      - "rail delay"
+      - "air cargo capacity"
+
+  world_bank_lpi:
+    base_url: "http://api.worldbank.org/v2"
+    indicator_codes:
+      overall: "LP.LPI.OVRL.XQ"      # Overall Logistics Performance Index (1=low to 5=high)
+      customs: "LP.LPI.CUST.XQ"      # Efficiency of customs clearance process
+      infrastructure: "LP.LPI.INFR.XQ" # Quality of trade and transport infrastructure
+      international_shipments: "LP.LPI.ITRN.XQ" # Ease of arranging competitively priced shipments
+      logistics_quality: "LP.LPI.LOGS.XQ" # Competence and quality of logistics services
+      tracking_tracing: "LP.LPI.TRAC.XQ"  # Ability to track and trace consignments
+      timeliness: "LP.LPI.TIME.XQ"   # Timeliness of shipments in reaching destination
+    target_years: [2018, 2023]
+
+preprocessing:
+  hs_concordance:
+    source_versions: ["H3", "H4", "H5"] # HS 2007, 2012, 2017
+    target_version: "H6"               # HS 2022 standardized
+  mirror_reconciliation:
+    cif_fob_adjustment_factor: 1.06    # Standard 6% maritime freight & insurance margin
+    discrepancy_threshold: 0.25        # 25% tolerance threshold
+    min_trade_value_usd: 1000000       # $1M USD minimum volume filter
+  monthly_imputation:
+    method: "iterative_spline"         # Options: linear, iterative_spline, seasonal_kalman
+    max_consecutive_missing: 3
+
+nlp:
+  spacy_model: "en_core_web_sm"
+  custom_entities:
+    - label: "COMMODITY"
+      patterns: ["semiconductor", "microchip", "silicon wafer", "printed circuit board", "microcontroller", "lithography machine", "GPU", "CPU"]
+    - label: "FACILITY"
+      patterns: ["Port of Shanghai", "Port of Los Angeles", "Port of Rotterdam", "Suez Canal", "Panama Canal", "Strait of Malacca", "Port of Antwerp", "Port of Ningbo"]
+    - label: "LOGISTICS_OPERATOR"
+      patterns: ["Maersk", "MSC", "CMA CGM", "COSCO", "Hapag-Lloyd", "Evergreen Marine", "ONE", "HMM", "Yang Ming", "ZIM"]
+  sentiment:
+    model_name: "distilbert-base-uncased-finetuned-sst-2-english"
+    batch_size: 64
+    max_length: 256
+
+topic_modeling:
+  bertopic:
+    embedding_model: "all-MiniLM-L6-v2"
+    nr_topics: 15
+    min_topic_size: 30
+    n_neighbors: 15
+    n_components: 5
+    min_cluster_size: 20
+    top_n_words: 10
+
+anomaly_detection:
+  isolation_forest:
+    n_estimators: 250
+    contamination: 0.05
+    max_samples: 0.8
+    random_state: 42
+    features:
+      - "trade_value_usd_log_diff"
+      - "trade_value_usd_zscore_90d"
+      - "trade_value_usd_yoy_pct_drop"
+      - "volatility_ratio_30_90"
+  dbscan:
+    eps_km: 1200.0                     # Spatial clustering radius in kilometers
+    min_samples: 3
+    metric: "haversine"
+
+granger_causality:
+  significance_level: 0.05
+  tested_lags: [15, 30, 45, 60]       # Day lags evaluated
+  max_lag: 60
+  stationarity_pvalue_threshold: 0.05
+
+signal_fusion:
+  weights:
+    trade_anomaly: 0.35
+    news_sentiment: 0.25
+    topic_relevance: 0.20
+    lpi_vulnerability: 0.20
+  alert_thresholds:
+    low: 0.35
+    medium: 0.55
+    high: 0.75
+    critical: 0.88
+  lead_time_target_days: 30
+
+database:
+  host: "localhost"
+  port: 5432
+  dbname: "supply_chain_db"
+  user: "postgres"
+  password_env: "PGPASSWORD"
+  schema: "public"
