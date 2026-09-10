@@ -1,7 +1,7 @@
 # Multimodal Supply Chain Disruption Early-Warning System
 
 [![Python](https://img.shields.io/badge/Python-Logistics_AI-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/) [![Machine Learning](https://img.shields.io/badge/ML-Signal_Fusion-00C896?style=for-the-badge&logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
-[![Author](https://img.shields.io/badge/Author-Abdussatar-E50914?style=for-the-badge&logo=github&logoColor=white)](https://github.com/satarabdus692-bot)
+[![Author](https://img.shields.io/badge/Author-Abdussatar-E50914?style=for-the-badge&logo=github&logoColor=white)](https://github.com/abdussatarkhan)
 
 > **An early-warning forecasting model fusing maritime port telemetry, shipping bill of ladings, and global news NLP risk sentiment to forecast logistics bottlenecks up to 30 days in advance.**
 
@@ -42,7 +42,7 @@ graph TD
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/satarabdus692-bot/supply-chain-disruption-warning.git
+git clone https://github.com/abdussatarkhan/supply-chain-disruption-warning.git
 cd supply-chain-disruption-warning
 ```
 
@@ -60,8 +60,8 @@ pip install -r requirements.txt
 
 ## 👨‍💻 Author & Profile
 
-Built and maintained by **Abdussatar** ([@satarabdus692-bot](https://github.com/satarabdus692-bot)).  
-For technical discussions, collaboration, or queries, feel free to reach out via [LinkedIn](https://www.linkedin.com/in/abdus-satar-5150813b5/) or [GitHub](https://github.com/satarabdus692-bot).
+Built and maintained by **Abdussatar** ([@abdussatarkhan](https://github.com/abdussatarkhan)).  
+For technical discussions, collaboration, or queries, feel free to reach out via [LinkedIn](https://www.linkedin.com/in/abdus-satar-5150813b5/) or [GitHub](https://github.com/abdussatarkhan).
 
 ---
 
