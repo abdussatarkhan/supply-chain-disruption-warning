@@ -1,5 +1,6 @@
 # Multimodal Supply Chain Disruption Early-Warning System
 
+[![CI](https://github.com/abdussatarkhan/supply-chain-disruption-warning/actions/workflows/ci.yml/badge.svg)](https://github.com/abdussatarkhan/supply-chain-disruption-warning/actions)
 [![Python](https://img.shields.io/badge/Python-Logistics_AI-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/) [![Machine Learning](https://img.shields.io/badge/ML-Signal_Fusion-00C896?style=for-the-badge&logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
 [![Author](https://img.shields.io/badge/Author-Abdussatar-E50914?style=for-the-badge&logo=github&logoColor=white)](https://github.com/abdussatarkhan)
 
@@ -55,6 +56,16 @@ source venv/bin/activate  # On Windows: .\venv\Scripts\activate
 # Install dependencies (if requirements.txt exists)
 pip install -r requirements.txt
 ```
+
+---
+
+## 🗺️ Roadmap & Upcoming Features
+
+- [x] Multimodal signal fusion (maritime AIS + global news NLP)
+- [x] Isolation Forest & Gradient Boosted bottleneck classification
+- [ ] 30-day ahead container freight index forecasting
+- [ ] Global port congestion interactive map
+- [ ] Automated logistics risk briefing email digests
 
 ---
 
